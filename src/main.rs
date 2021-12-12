@@ -9,6 +9,29 @@ mod tests {
     use super::compression::*;
     use rstest::*;
 
+    fn helper(
+        s: &str,
+        search_buffer_size: usize,
+        lookahead_size: usize,
+        encoded_text_size: usize,
+    ) -> String {
+        let plain_text = s.to_string();
+        let naive_matcher = matchers::NaiveMatcher {
+            search_buffer_size: search_buffer_size,
+            lookahead_buffer_size: lookahead_size,
+        };
+        let compressor = Compressor {
+            matcher: Box::new(naive_matcher),
+        };
+        let encoded_text = compressor.compress(&plain_text);
+        assert_eq!(encoded_text.len(), encoded_text_size);
+        println!("printing encoded text");
+        for entry in &encoded_text {
+            println!("({}, {}, {})", entry.0, entry.1, entry.2);
+        }
+        compressor.decompress(encoded_text)
+    }
+
     /**
      * No limit on search buffer or look ahead
      */
@@ -23,19 +46,8 @@ mod tests {
     #[case("ababcbababaa", 5)]
     #[case("ababcbababacbaaa", 7)]
     fn test_encode_decode(#[case] s: &str, #[case] encoded_text_size: usize) {
-        let plain_text = s.to_string();
-        let naive_matcher = matchers::NaiveMatcher::default();
-        let compressor = Compressor {
-            matcher: Box::new(naive_matcher),
-        };
-        let encoded_text = compressor.compress(&plain_text);
-        assert_eq!(encoded_text.len(), encoded_text_size);
-        println!("printing encoded text");
-        for entry in &encoded_text {
-            println!("({}, {}, {})", entry.0, entry.1, entry.2);
-        }
-        let decoded_text: String = compressor.decompress(encoded_text);
-        assert_eq!(plain_text, decoded_text);
+        let decoded_text = helper(s, 0, 0, encoded_text_size);
+        assert_eq!(s.to_string(), decoded_text);
     }
 
     /**
@@ -57,22 +69,8 @@ mod tests {
         #[case] search_buffer_size: usize,
         #[case] encoded_text_size: usize,
     ) {
-        let plain_text = s.to_string();
-        let naive_matcher = matchers::NaiveMatcher {
-            search_buffer_size: search_buffer_size,
-            lookahead_buffer_size: 0, // indicates unlimited lookahead buffer size
-        };
-        let compressor = Compressor {
-            matcher: Box::new(naive_matcher),
-        };
-        let encoded_text = compressor.compress(&plain_text);
-        assert_eq!(encoded_text.len(), encoded_text_size);
-        println!("printing encoded text");
-        for entry in &encoded_text {
-            println!("({}, {}, {})", entry.0, entry.1, entry.2);
-        }
-        let decoded_text: String = compressor.decompress(encoded_text);
-        assert_eq!(plain_text, decoded_text);
+        let decoded_text = helper(s, search_buffer_size, 0, encoded_text_size);
+        assert_eq!(s.to_string(), decoded_text);
     }
 
     /**
@@ -96,22 +94,13 @@ mod tests {
         #[case] lookaside_buffer_size: usize,
         #[case] encoded_text_size: usize,
     ) {
-        let plain_text = s.to_string();
-        let naive_matcher = matchers::NaiveMatcher {
-            search_buffer_size: search_buffer_size,
-            lookahead_buffer_size: lookaside_buffer_size,
-        };
-        let compressor = Compressor {
-            matcher: Box::new(naive_matcher),
-        };
-        let encoded_text = compressor.compress(&plain_text);
-        assert_eq!(encoded_text.len(), encoded_text_size);
-        println!("printing encoded text");
-        for entry in &encoded_text {
-            println!("({}, {}, {})", entry.0, entry.1, entry.2);
-        }
-        let decoded_text: String = compressor.decompress(encoded_text);
-        assert_eq!(plain_text, decoded_text);
+        let decoded_text = helper(
+            s,
+            search_buffer_size,
+            lookaside_buffer_size,
+            encoded_text_size,
+        );
+        assert_eq!(s.to_string(), decoded_text);
     }
 
     /**
