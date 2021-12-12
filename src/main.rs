@@ -48,7 +48,8 @@ mod tests {
     #[case("swag", 3, 4)]
     #[case("aabaa", 4, 3)]
     #[case("aabaa", 1, 4)]
-    #[case("ababcbababaa", 4, 6)]
+    #[case("ababcbababaa", 4, 5)]
+    #[case("ababcbababacbaaa", 6, 7)]
     fn test_with_search_buffer(#[case] s: &str, #[case] search_buffer_size: usize, #[case] encoded_text_size: usize) {
         let plain_text = s.to_string();
         let naive_matcher = super::compression::matchers::NaiveMatcher {
