@@ -47,4 +47,22 @@ mod tests {
             assert_eq!(plain_text, decoded_text);
         });
     }
+
+    #[bench]
+    fn bench_million_multi_char(b: &mut Bencher) {
+        b.iter(|| {
+            let plain_text = "swag".repeat(1000000);
+            let decoded_text = encode_decode_helper(&plain_text, 0, 0);
+            assert_eq!(plain_text, decoded_text);
+        });
+    }
+
+    #[bench]
+    fn bench_million_multi_char_with_buffer_limit(b: &mut Bencher) {
+        b.iter(|| {
+            let plain_text = "swag".repeat(1000000);
+            let decoded_text = encode_decode_helper(&plain_text, 1000, 1000);
+            assert_eq!(plain_text, decoded_text);
+        });
+    }
 }
