@@ -6,8 +6,8 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use rstest::*;
     use super::compression::*;
+    use rstest::*;
 
     /**
      * No limit on search buffer or look ahead
@@ -118,32 +118,36 @@ mod tests {
      * Test with big data sets
      */
     #[rstest]
-    fn test_big_strings() {
+    #[case(10000, 100)]
+    #[case(100000, 100)]
+    fn test_big_strings(#[case] string_size: usize, #[case] buffer_size: usize) {
         // large string with a single character repeated n times
-        let plain_text = "a".repeat(10000);
+        let plain_text = "a".repeat(string_size);
         let naive_matcher = matchers::NaiveMatcher::default();
-        let compressor = Compressor {
+        let mut compressor = Compressor {
             matcher: Box::new(naive_matcher),
         };
         let encoded_text = compressor.compress(&plain_text);
+        let expected_code_size = (string_size as f64).log2().ceil() as usize;
         assert!(
-            encoded_text.len() <= (10000.0_f64.log2().ceil() as usize),
+            encoded_text.len() <= expected_code_size,
             "left : {} right : {}",
             encoded_text.len(),
-            10000.0_f64.log2()
+            expected_code_size,
         );
-        let decoded_text: String = compressor.decompress(encoded_text);
+        let decoded_text = compressor.decompress(encoded_text);
         assert_eq!(plain_text, decoded_text);
 
-        let compressor = Compressor {
-            matcher: Box::new(matchers::NaiveMatcher{
-                search_buffer_size: 100,
-                lookahead_buffer_size: 100,
+        compressor = Compressor {
+            matcher: Box::new(matchers::NaiveMatcher {
+                search_buffer_size: buffer_size,
+                lookahead_buffer_size: buffer_size,
             }),
         };
         let encoded_text = compressor.compress(&plain_text);
         assert!(
-            encoded_text.len() <= 100 + (100.0_f64.log2().ceil() as usize),
+            encoded_text.len()
+                <= (string_size / buffer_size) + (buffer_size as f64).log2().ceil() as usize,
             "left : {} right : {}",
             encoded_text.len(),
             10000.0_f64.log2()
