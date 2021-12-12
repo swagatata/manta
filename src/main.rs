@@ -18,6 +18,8 @@ mod tests {
     #[case("*", 1)]
     #[case("swag", 4)]
     #[case("aabaa", 3)]
+    #[case("ababa", 3)]
+    #[case("abaaba", 4)]
     #[case("ababcbababaa", 5)]
     #[case("ababcbababacbaaa", 7)]
     fn test_encode_decode(#[case] s: &str, #[case] encoded_text_size: usize) {
