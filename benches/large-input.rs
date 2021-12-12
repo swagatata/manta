@@ -23,10 +23,10 @@ mod tests {
             matcher: Box::new(naive_matcher),
         };
         let encoded_text = compressor.compress(s);
-        println!("printing encoded text");
-        for entry in &encoded_text {
-            println!("({}, {}, {})", entry.0, entry.1, entry.2);
-        }
+        // println!("printing encoded text");
+        // for entry in &encoded_text {
+        //     println!("({}, {}, {})", entry.0, entry.1, entry.2);
+        // }
         compressor.decompress(encoded_text)
     }
 
