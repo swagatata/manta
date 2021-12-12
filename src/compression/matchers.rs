@@ -38,6 +38,9 @@ impl Matcher for NaiveMatcher {
         for i in 0..search_buffer.len() {
             // Min of (remaining part of search buffer, pattern)
             let max_match_limit = std::cmp::min(search_buffer.len() - i, pattern.len());
+            if max_match_limit <= match_length_max {
+                break;
+            }
             match_length = 0;
             for j in 0..max_match_limit {
                 if search_buffer[i + j] != pattern[j] {

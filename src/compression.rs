@@ -13,8 +13,6 @@ impl Compressor {
         let mut buffer: Vec<(usize, usize, char)> = vec![(0, 0, chars[0])];
         // println!("cur_i, offset, length, character: {} {} {} {}", 0, 0, 0, chars[0]);
         let mut cur_i: usize = 1;
-        let search_buffer_size = self.matcher.get_search_buffer_size(); 
-        let lookahead_size = self.matcher.get_lookahead_buffer_size();
 
         let mut character: char;
         let mut offset: usize;
@@ -22,16 +20,16 @@ impl Compressor {
             // A round of matching between
             // s[0..cur_i) and
             // s[cur_i..s.len())
-            let search_buffer_start_i = match search_buffer_size {
+            let search_buffer_start_i = match self.matcher.get_search_buffer_size() {
                 0 => 0,
                 search_buffer_size => match cur_i > search_buffer_size {
                     true => cur_i - search_buffer_size,
                     false => 0, 
                 },
             };
-            let lookahead_end_i = match lookahead_size {
+            let lookahead_end_i = match self.matcher.get_lookahead_buffer_size() {
                 0 => chars.len(),
-                _ => std::cmp::min(cur_i + lookahead_size, chars.len()),
+                lookahead_size => std::cmp::min(cur_i + lookahead_size, chars.len()),
             }; 
             let (start_i, length) = self.matcher.find_max_match(
                 &chars[search_buffer_start_i..cur_i], 
