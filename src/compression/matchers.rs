@@ -13,13 +13,18 @@ pub trait Matcher {
     fn find_max_match(&self, search_buffer: &[char], pattern: &[char]) -> (usize, usize);
 
     fn get_search_buffer_size(&self) -> usize;
+    fn get_lookahead_buffer_size(&self) -> usize;
 }
 
 /**
  * Basic implementation of with brute force sequential matching.
  */
 pub struct NaiveMatcher {
+    // 0 indicates unlimited search buffer size
     pub search_buffer_size: usize,
+
+    // 0 indicates unlimited lookahead buffer size
+    pub lookahead_buffer_size: usize,
 }
 
 impl Matcher for NaiveMatcher {
@@ -51,12 +56,17 @@ impl Matcher for NaiveMatcher {
     fn get_search_buffer_size(&self) -> usize {
         self.search_buffer_size
     }
+
+    fn get_lookahead_buffer_size(&self) -> usize {
+        self.lookahead_buffer_size
+    }
 }
 
 impl Default for NaiveMatcher {
     fn default() -> NaiveMatcher {
         NaiveMatcher {
             search_buffer_size: 0,
+            lookahead_buffer_size: 0,
         }
     }
 }

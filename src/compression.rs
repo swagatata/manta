@@ -14,6 +14,7 @@ impl Compressor {
         println!("cur_i, offset, length, character: {} {} {} {}", 0, 0, 0, chars[0]);
         let mut cur_i: usize = 1;
         let search_buffer_size = self.matcher.get_search_buffer_size(); 
+        let lookahead_size = self.matcher.get_lookahead_buffer_size();
 
         let mut character: char;
         let mut offset: usize;
@@ -28,8 +29,15 @@ impl Compressor {
                     false => 0, 
                 },
             };
+            let lookahead_end_i = match lookahead_size {
+                0 => chars.len(),
+                _ => std::cmp::min(cur_i + lookahead_size, chars.len()),
+            }; 
             println!("search_buffer_start_i is {}", search_buffer_start_i);
-            let (start_i, length) = self.matcher.find_max_match(&chars[search_buffer_start_i..cur_i], &chars[cur_i..s.len()]);
+            let (start_i, length) = self.matcher.find_max_match(
+                &chars[search_buffer_start_i..cur_i], 
+                &chars[cur_i..lookahead_end_i]
+            );
             offset = match length {
                 0 => 0,
                 _ => cur_i - (search_buffer_start_i + start_i), 
